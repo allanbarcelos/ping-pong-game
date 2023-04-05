@@ -1,0 +1,22 @@
+version: "2"
+services:
+    api:
+        image: node
+        ports: 
+            - "3000:3000"
+        volumes:
+            - ./:/usr/api
+        working_dir: /usr/api
+        command: bash -c "npm install && npm start"
+        networks:
+            - default
+    www:
+        image: nginx
+        ports: 
+            - "80:80"
+        volumes:
+            - ./:/usr/share/nginx/html
+        networks:
+            - default
+volumes:
+    persistent:
