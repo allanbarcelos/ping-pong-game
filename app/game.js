@@ -31,7 +31,7 @@ class GameManager {
         this.lastUpdateTime = 0;
         this.fps = 60;
         this.frameInterval = 1000 / this.fps;
-        
+
         this.initializeElements();
         this.initializeSocket();
         this.setupEventListeners();
@@ -155,21 +155,21 @@ class GameManager {
     }
 
     initializeSocket() {
-        const game = prompt('Press "OK" to start new game or type the Game Code:');
-        
-        const pathParts = window.location.pathname.split('/');
-        pathParts.pop();
-        const basePath = pathParts.join('/');
+        this.showGameCodeModal((gameCode) => {
+            const pathParts = window.location.pathname.split('/');
+            pathParts.pop();
+            const basePath = pathParts.join('/');
 
-        this.socket = io(window.location.origin, {
-            path: `${basePath}/socket.io`,
-            query: { game },
-            reconnection: true,
-            reconnectionAttempts: 5,
-            reconnectionDelay: 1000
+            this.socket = io(window.location.origin, {
+                path: `${basePath}/socket.io`,
+                query: { game: gameCode },
+                reconnection: true,
+                reconnectionAttempts: 5,
+                reconnectionDelay: 1000
+            });
+
+            this.setupSocketEvents();
         });
-
-        this.setupSocketEvents();
     }
 
     setupSocketEvents() {
@@ -204,7 +204,7 @@ class GameManager {
             this.state.isPlayer1 = isPlayer1;
             this.elements.player.textContent = isPlayer1 ? 'Player 1' : 'Player 2';
             this.setupPlayerControls();
-            
+
             if (isPlayer1) {
                 this.showWaitingMessage("Waiting for Player 2...");
             } else {
@@ -214,7 +214,7 @@ class GameManager {
 
         this.socket.on("player2IsOn", (player2IsOn) => {
             this.state.player2Connected = player2IsOn;
-            
+
             if (player2IsOn && this.state.isPlayer1) {
                 this.hideWaitingMessage();
                 if (!this.state.gameStarted) {
@@ -262,7 +262,7 @@ class GameManager {
             this.state.scores.player1 = data.player1;
             this.state.scores.player2 = data.player2;
             this.updateScoreboard();
-            
+
             if (data.player1 >= 5 || data.player2 >= 5) {
                 this.endGame(data.player1 >= 5 ? 'Player 1' : 'Player 2');
             }
@@ -302,7 +302,7 @@ class GameManager {
 
             const paddleToMove = this.state.isPlayer1 ? this.elements.paddle1 : this.elements.paddle2;
             const eventType = this.state.isPlayer1 ? "paddle1" : "paddle2";
-            
+
             this.movePaddle(paddleToMove, e.clientY);
             this.socket.emit(eventType, { clientY: e.clientY });
         });
@@ -310,12 +310,12 @@ class GameManager {
         // Touch support for mobile devices
         document.addEventListener("touchmove", (e) => {
             if (this.state.gameOver || !this.state.gameStarted) return;
-            
+
             e.preventDefault();
             const touch = e.touches[0];
             const paddleToMove = this.state.isPlayer1 ? this.elements.paddle1 : this.elements.paddle2;
             const eventType = this.state.isPlayer1 ? "paddle1" : "paddle2";
-            
+
             this.movePaddle(paddleToMove, touch.clientY);
             this.socket.emit(eventType, { clientY: touch.clientY });
         });
@@ -324,10 +324,10 @@ class GameManager {
     movePaddle(paddle, clientY) {
         const gameBoardRect = this.elements.gameBoard.getBoundingClientRect();
         let paddleY = clientY - gameBoardRect.top - paddle.offsetHeight / 2;
-        
+
         // Constrain paddle to game board
         paddleY = Math.max(0, Math.min(paddleY, gameBoardRect.height - paddle.offsetHeight));
-        
+
         paddle.style.top = paddleY + "px";
     }
 
@@ -347,7 +347,7 @@ class GameManager {
         if (this.state.gameOver || !this.state.gameStarted) return;
 
         const deltaTime = currentTime - this.lastUpdateTime;
-        
+
         if (deltaTime > this.frameInterval) {
             this.updateGameState();
             this.render();
@@ -379,16 +379,16 @@ class GameManager {
         const paddle2Rect = this.elements.paddle2.getBoundingClientRect();
         const ballRect = this.elements.ball.getBoundingClientRect();
 
-        if (ballX <= paddle1Rect.width && 
-            ballY + this.elements.ball.offsetHeight >= paddle1Rect.top && 
+        if (ballX <= paddle1Rect.width &&
+            ballY + this.elements.ball.offsetHeight >= paddle1Rect.top &&
             ballY <= paddle1Rect.bottom) {
             this.state.ball.speedX = Math.abs(this.state.ball.speedX);
             // Add some randomness to ball angle
             this.state.ball.speedY += (Math.random() - 0.5) * 2;
         }
 
-        if (ballX >= this.elements.gameBoard.offsetWidth - paddle2Rect.width - this.elements.ball.offsetWidth && 
-            ballY + this.elements.ball.offsetHeight >= paddle2Rect.top && 
+        if (ballX >= this.elements.gameBoard.offsetWidth - paddle2Rect.width - this.elements.ball.offsetWidth &&
+            ballY + this.elements.ball.offsetHeight >= paddle2Rect.top &&
             ballY <= paddle2Rect.bottom) {
             this.state.ball.speedX = -Math.abs(this.state.ball.speedX);
             // Add some randomness to ball angle
@@ -433,7 +433,7 @@ class GameManager {
     endGame(winner) {
         this.state.gameOver = true;
         this.state.gameStarted = false;
-        
+
         if (this.animationFrameId) {
             cancelAnimationFrame(this.animationFrameId);
         }
@@ -447,7 +447,7 @@ class GameManager {
         this.state.scores.player2 = 0;
         this.state.gameOver = false;
         this.elements.gameOverScreen.style.display = 'none';
-        
+
         this.socket.emit("gameReset");
         this.resetGame();
     }
@@ -455,7 +455,7 @@ class GameManager {
     resetGame() {
         this.updateScoreboard();
         this.resetBallPosition();
-        
+
         if (this.state.player2Connected) {
             this.startGame();
         }
@@ -495,6 +495,27 @@ class GameManager {
             this.elements.waitingMessage.style.display = 'none';
         }
     }
+
+    showGameCodeModal(callback) {
+        const modal = document.getElementById("gameCodeModal");
+        const input = document.getElementById("gameCodeInput");
+        const btnConfirm = document.getElementById("modalConfirm");
+        const btnCancel = document.getElementById("modalCancel");
+
+        modal.classList.remove("hidden");
+
+        btnConfirm.onclick = () => {
+            const code = input.value.trim();
+            modal.classList.add("hidden");
+            callback(code === "" ? null : code);
+        };
+
+        btnCancel.onclick = () => {
+            modal.classList.add("hidden");
+            callback(null); // start new game
+        };
+    }
+
 }
 
 // Initialize game when DOM is loaded

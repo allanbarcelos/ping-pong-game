@@ -72,6 +72,21 @@
         Move your mouse up and down to control your paddle
     </div>
 
+
+    <!-- Game Code Modal -->
+    <div id="gameCodeModal" class="modal-overlay">
+        <div class="modal">
+            <h2>Enter Game Code</h2>
+            <p>Leave empty to create a new game</p>
+            <input id="gameCodeInput" type="text" placeholder="Game code..." />
+            
+            <div class="modal-buttons">
+                <button id="modalCancel">Cancel</button>
+                <button id="modalConfirm">Start</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
     <script src="game.js"></script>
 </body>
