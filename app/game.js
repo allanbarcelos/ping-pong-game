@@ -156,9 +156,13 @@ class GameManager {
 
     initializeSocket() {
         const game = prompt('Press "OK" to start new game or type the Game Code:');
-        const api = `//${window.location.hostname}`;
+        
+        const pathParts = window.location.pathname.split('/');
+        pathParts.pop();
+        const basePath = pathParts.join('/');
 
-        this.socket = io(`${api}`, {
+        this.socket = io(window.location.origin, {
+            path: `${basePath}/socket.io`,
             query: { game },
             reconnection: true,
             reconnectionAttempts: 5,
