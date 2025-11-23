@@ -277,6 +277,11 @@ io.on("connection", async (socket) => {
   }
 });
 
+
+app.get('/', (req, res) => {
+  res.send('API Ping-Pong Game');
+});
+
 // Health check endpoint com verificação do Redis
 app.get("/health", async (req, res) => {
   try {
