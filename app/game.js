@@ -375,26 +375,29 @@ class GameManager {
             ballY = ballY <= 0 ? 0 : this.elements.gameBoard.offsetHeight - this.elements.ball.offsetHeight;
         }
 
-        // Paddle collisions
-        const paddle1Rect = this.elements.paddle1.getBoundingClientRect();
-        const paddle2Rect = this.elements.paddle2.getBoundingClientRect();
-        const ballRect = this.elements.ball.getBoundingClientRect();
+        const paddle1Y = parseFloat(this.elements.paddle1.style.top);
+        const paddle2Y = parseFloat(this.elements.paddle2.style.top);
+        const paddleHeight = this.elements.paddle1.offsetHeight;
+        const paddleWidth = this.elements.paddle1.offsetWidth;
+        const ballHeight = this.elements.ball.offsetHeight;
+        const ballWidth = this.elements.ball.offsetWidth;
 
-        if (ballX <= paddle1Rect.width &&
-            ballY + this.elements.ball.offsetHeight >= paddle1Rect.top &&
-            ballY <= paddle1Rect.bottom) {
+        // Colisão paddle1
+        if (ballX <= paddleWidth &&
+            ballY + ballHeight >= paddle1Y &&
+            ballY <= paddle1Y + paddleHeight) {
             this.state.ball.speedX = Math.abs(this.state.ball.speedX);
-            // Add some randomness to ball angle
             this.state.ball.speedY += (Math.random() - 0.5) * 2;
         }
 
-        if (ballX >= this.elements.gameBoard.offsetWidth - paddle2Rect.width - this.elements.ball.offsetWidth &&
-            ballY + this.elements.ball.offsetHeight >= paddle2Rect.top &&
-            ballY <= paddle2Rect.bottom) {
+        // Colisão paddle2
+        if (ballX + ballWidth >= this.elements.gameBoard.offsetWidth - paddleWidth &&
+            ballY + ballHeight >= paddle2Y &&
+            ballY <= paddle2Y + paddleHeight) {
             this.state.ball.speedX = -Math.abs(this.state.ball.speedX);
-            // Add some randomness to ball angle
             this.state.ball.speedY += (Math.random() - 0.5) * 2;
         }
+
 
         // Score detection
         if (ballX <= 0) {
