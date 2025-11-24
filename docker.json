@@ -1,0 +1,5 @@
+{
+    "root": {
+        "depends_on": "api"
+    }
+}

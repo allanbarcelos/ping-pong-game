@@ -139,7 +139,7 @@ io.use(async (socket, next) => {
   try {
     const { game } = socket.handshake.query;
     
-    if (!game) {
+    if (!game || game === "null") {
       // Criar novo jogo
       socket.game = makeid(8);
       socket.isPlayer1 = true;

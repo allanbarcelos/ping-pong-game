@@ -159,10 +159,11 @@ class GameManager {
             const pathParts = window.location.pathname.split('/');
             pathParts.pop();
             const basePath = pathParts.join('/');
+            const query = gameCode ? { game: gameCode } : undefined;
 
             this.socket = io(window.location.origin, {
                 path: `${basePath}/socket.io`,
-                query: { game: gameCode },
+                query,
                 reconnection: true,
                 reconnectionAttempts: 5,
                 reconnectionDelay: 1000
